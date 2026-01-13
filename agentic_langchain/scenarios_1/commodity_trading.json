@@ -1,0 +1,57 @@
+{
+  "name": "Commodity Trading",
+  "description": "Identifies commodity trading activities and assesses SIAP classification for energy, metals, agriculturals, and primary/secondary commodities",
+  "start": "Q1",
+  "questions": {
+    "Q1": {
+      "text": "Is the client directly involved in commodity trading through their business activity?",
+      "next_if_yes": "Q2",
+      "next_if_no": null
+    },
+    "Q2": {
+      "text": "Is the client activity solely involved in mining, extraction, and processing of commodities (upstream operations)?",
+      "next_if_yes": null,
+      "next_if_no": "Q3"
+    },
+    "Q3": {
+      "text": "Is the client activity solely involved in the sale of commodities to retail consumers (B2C)?",
+      "next_if_yes": null,
+      "next_if_no": "Q4"
+    },
+    "Q4": {
+      "text": "Is the client activity solely involved in trading of financial instruments relating to commodities (e.g., trading, portfolio management, custody, investment securities)?",
+      "next_if_yes": null,
+      "next_if_no": "Q5"
+    },
+    "Q5": {
+      "text": "Is the client involved in trading of energy commodities (including petrochemicals, electricity)?",
+      "next_if_yes": "Q9",
+      "next_if_no": "Q6"
+    },
+    "Q6": {
+      "text": "Is the client involved in trading of metals (including minerals)?",
+      "next_if_yes": "Q9",
+      "next_if_no": "Q7"
+    },
+    "Q7": {
+      "text": "Is the client involved in trading of agriculturals or soft commodities?",
+      "next_if_yes": "Q9",
+      "next_if_no": "Q8"
+    },
+    "Q8": {
+      "text": "Is the client involved in trading of primary commodities that are extracted or captured directly from natural resources, or secondary commodities produced from processing primary resources (e.g., refined gold)?",
+      "next_if_yes": "Q9",
+      "next_if_no": null
+    },
+    "Q9": {
+      "text": "Does the client have direct engagement in the commodity trading activity (not just passive investment or advisory role)?",
+      "next_if_yes": "Q10",
+      "next_if_no": null
+    },
+    "Q10": {
+      "text": "Does the income from commodity trading activity represent more than 10% of the client's total income?",
+      "next_if_yes": null,
+      "next_if_no": null
+    }
+  }
+}

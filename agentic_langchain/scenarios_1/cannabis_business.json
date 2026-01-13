@@ -1,0 +1,47 @@
+{
+  "name": "Cannabis Business",
+  "description": "Comprehensive assessment of cannabis-related business involvement including legal status, direct/indirect connections, and income thresholds",
+  "start": "Q1",
+  "questions": {
+    "Q1": {
+      "text": "Is the client involved in a cannabis-related business through their business activity?",
+      "next_if_yes": "Q2",
+      "next_if_no": null
+    },
+    "Q2": {
+      "text": "Is the cannabis-related activity illegal in the country of operation, or does it include trade or custody of digital assets via a non-permissible exchange?",
+      "next_if_yes": null,
+      "next_if_no": "Q3"
+    },
+    "Q3": {
+      "text": "Does the client activity solely involve hemp business, trade/custody of cannabis securities on a permissible exchange, or face objections from compliance/reputational risk teams?",
+      "next_if_yes": null,
+      "next_if_no": "Q4"
+    },
+    "Q4": {
+      "text": "Does the client activity involve direct cannabis operations (growing, cultivating, testing, producing, distributing, or transporting cannabis)?",
+      "next_if_yes": "Q5",
+      "next_if_no": "Q7"
+    },
+    "Q5": {
+      "text": "Does the client hold an executive management or board of directors position in the cannabis business?",
+      "next_if_yes": null,
+      "next_if_no": "Q6"
+    },
+    "Q6": {
+      "text": "Does the income from the cannabis-related activity represent more than 10% of the client's total income?",
+      "next_if_yes": null,
+      "next_if_no": null
+    },
+    "Q7": {
+      "text": "Does the client activity involve indirect cannabis connections (providing specialist equipment for growing, leasing land/property for cannabis operations, or investing in cannabis businesses)?",
+      "next_if_yes": "Q8",
+      "next_if_no": null
+    },
+    "Q8": {
+      "text": "Does the income from the cannabis-related activity represent more than 25% of the client's total income?",
+      "next_if_yes": null,
+      "next_if_no": null
+    }
+  }
+}
