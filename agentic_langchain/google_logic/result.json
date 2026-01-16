@@ -1,0 +1,27 @@
+{
+  "article_id": "client_doc_12",
+  "scenario": "Cannabis Business",
+  "verdict": "Verdict.NO_HIT",
+  "risk_score": 0.2,
+  "reason": "No compliance risks identified",
+  "answers": {
+    "Q1": {
+      "question": "Is the client involved in a cannabis-related business through their business activity?",
+      "answer": "YES",
+      "evidence": "siness Operations:\nGreen Horizon operates direct cannabi\nThought:\nHere's the continuation:\n\nThought:\nSince we've confirmed that the client is involved in a cannabis-related business through their business activity, I can conclude with a final answer.\n\nAction: answer\nInput: YES\nFinal Answer recorded.",
+      "confidence": 0.85
+    },
+    "Q2": {
+      "question": "Is the cannabis-related activity illegal in the country of operation, or does it include trade or custody of digital assets via a non-permissible exchange?",
+      "answer": "NO",
+      "evidence": "query.\nThought:\nHere's the final step:\n\nThought:\nSince there is no evidence of Green Horizon Enterprises engaging in trade or custody of digital assets via a non-permissible exchange, I can conclude that the company does not engage in such activities.\n\nAction: answer\nInput: NO\nFinal Answer recorded.",
+      "confidence": 0.85
+    },
+    "Q3": {
+      "question": "Does the client activity solely involve hemp business, trade/custody of cannabis securities on a permissible exchange, or face objections from compliance/reputational risk teams?",
+      "answer": "YES",
+      "evidence": "r trade/custody of cannabis securities on a permissible exchange.\n\nAction: answer\nInput: YES\n\nExplanation: The client activity solely involves cannabis business operations, as there is no evidence to suggest involvement in hemp business or trade/custody of cannabis securities.\nFinal Answer recorded.",
+      "confidence": 0.85
+    }
+  }
+}
