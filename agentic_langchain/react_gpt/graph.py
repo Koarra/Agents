@@ -129,6 +129,16 @@ def process_article(article_id: str, article_text: str, llm) -> dict:
     print(f"Risk Score: {final_state['risk_score']:.2f}")
     print(f"Reason: {final_state['verdict_reason']}")
 
+    # Print additional info for MISSING_INFO verdicts
+    if final_state['final_verdict'] == Verdict.MISSING_INFO:
+        print(f"Missing Fields: {len(final_state.get('missing_fields', []))}")
+        print(f"Recommended Action: {final_state.get('recommended_action', 'N/A')}")
+
+    # Print flagged uncertain answers
+    uncertain = final_state.get('uncertain_answers', [])
+    if uncertain:
+        print(f"Uncertain Answers: {', '.join(uncertain)}")
+
     return dict(final_state)
 
 
@@ -170,15 +180,31 @@ def process_batch(articles: list[dict], llm) -> list[dict]:
                     "error": str(e)
                 })
 
-    # Summary
+    # Summary with all verdict types
     hits = sum(1 for r in results if r.get("final_verdict") == Verdict.HIT)
     no_hits = sum(1 for r in results if r.get("final_verdict") == Verdict.NO_HIT)
+    missing_info = sum(1 for r in results if r.get("final_verdict") == Verdict.MISSING_INFO)
+    pending = sum(1 for r in results if r.get("final_verdict") == Verdict.PENDING)
+
+    # Count articles with uncertain answers (for review)
+    flagged_for_review = sum(1 for r in results if r.get("uncertain_answers"))
 
     print("\n" + "=" * 60)
     print("BATCH SUMMARY")
     print("=" * 60)
     print(f"Total: {len(results)}")
-    print(f"HITs: {hits}")
-    print(f"NO_HITs: {no_hits}")
+    print(f"HITs: {hits} (escalate/reject)")
+    print(f"NO_HITs: {no_hits} (approve)")
+    print(f"MISSING_INFO: {missing_info} (request documents)")
+    print(f"PENDING/Errors: {pending}")
+    print(f"Flagged for review: {flagged_for_review} (medium confidence answers)")
+
+    # List missing info cases with needed documents
+    if missing_info > 0:
+        print("\n" + "-" * 40)
+        print("MISSING INFO CASES - Documents Needed:")
+        for r in results:
+            if r.get("final_verdict") == Verdict.MISSING_INFO:
+                print(f"  - {r.get('article_id')}: {r.get('recommended_action', 'N/A')}")
 
     return results

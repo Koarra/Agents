@@ -10,7 +10,7 @@ Uses langgraph.prebuilt.create_react_agent for the ReAct pattern.
 This requires an LLM that supports tool binding (e.g., OpenAI GPT-4).
 """
 
-from state import ComplianceState, Verdict, AnswerRecord
+from state import ComplianceState, Verdict, AnswerRecord, ConfidenceLevel, MissingFieldRecord
 from tools import (
     extract_text_evidence,
     validate_threshold,
@@ -24,8 +24,46 @@ from tools import (
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import HumanMessage
 
-# Confidence threshold for YES/NO decisions
-CONFIDENCE_THRESHOLD = 0.75
+# Confidence thresholds for routing decisions
+CONFIDENCE_HIGH = 0.75      # >75%: Reliable answer, continue normally
+CONFIDENCE_MEDIUM = 0.50    # 50-75%: Answer accepted but flagged as uncertain
+CONFIDENCE_LOW = 0.50       # <50%: Cannot determine, mark as MISSING
+
+
+def get_confidence_level(confidence: float) -> ConfidenceLevel:
+    """Classify confidence into HIGH, MEDIUM, or LOW."""
+    if confidence > CONFIDENCE_HIGH:
+        return ConfidenceLevel.HIGH
+    elif confidence >= CONFIDENCE_MEDIUM:
+        return ConfidenceLevel.MEDIUM
+    else:
+        return ConfidenceLevel.LOW
+
+
+def get_suggested_documents(question: str) -> str:
+    """
+    Suggest documents that could help answer the question.
+    Maps question types to relevant document requests.
+    """
+    question_lower = question.lower()
+
+    suggestions = {
+        "income": "income statements, tax returns, financial records",
+        "percentage": "ownership documents, shareholder registry, tax returns",
+        "executive": "corporate filings, org charts, employment contracts",
+        "board": "corporate filings, board minutes, annual reports",
+        "ownership": "shareholder registry, ownership certificates, cap table",
+        "direct": "business structure documents, operational agreements",
+        "illegal": "business licenses, regulatory filings, compliance certificates",
+        "hemp": "product documentation, regulatory permits, lab certificates",
+        "cannabis": "business licenses, state permits, operational documents"
+    }
+
+    for keyword, docs in suggestions.items():
+        if keyword in question_lower:
+            return docs
+
+    return "additional documentation related to this question"
 
 
 # =============================================================================
@@ -140,7 +178,7 @@ INSTRUCTIONS:
 1. Use the search_evidence tool to find relevant quotes from the article
 2. Use the check_threshold tool if you need to verify numerical values (percentages, amounts)
 3. Based on the evidence, provide a final answer: YES or NO
-4. You must be confident (>75%) to answer YES. If uncertain, answer NO.
+4. Report your actual confidence level. If very uncertain (<50%), say so clearly.
 
 After gathering evidence, respond with your final determination in this format:
 FINAL ANSWER: YES or NO
@@ -162,16 +200,25 @@ CONFIDENCE: A number between 0 and 1"""
         # Parse the response
         answer, reason, confidence = parse_react_response(response_text)
 
-        # Apply confidence threshold
-        if confidence <= CONFIDENCE_THRESHOLD:
-            print(f"[REACT] Low confidence ({confidence:.2f}) - defaulting to NO")
-            answer = False
-            reason = f"Insufficient confidence ({confidence:.2f} <= {CONFIDENCE_THRESHOLD}): {reason}"
+        # Classify confidence level
+        confidence_level = get_confidence_level(confidence)
+
+        # Log confidence routing
+        if confidence_level == ConfidenceLevel.HIGH:
+            print(f"[REACT] High confidence ({confidence:.2f}) - answer reliable")
+        elif confidence_level == ConfidenceLevel.MEDIUM:
+            print(f"[REACT] Medium confidence ({confidence:.2f}) - answer accepted but flagged")
+        else:
+            print(f"[REACT] Low confidence ({confidence:.2f}) - marking as MISSING")
+            # For low confidence, we don't force an answer - we mark it as missing
+            reason = f"Insufficient confidence ({confidence:.2f}): {reason}"
 
         return {
             "answer": answer,
             "reason": reason,
-            "confidence": confidence
+            "confidence": confidence,
+            "confidence_level": confidence_level.value,
+            "is_missing": confidence_level == ConfidenceLevel.LOW
         }
 
     except Exception as e:
@@ -229,17 +276,25 @@ def fallback_evidence_search(question: str, article: str) -> dict:
     print("[REACT] Falling back to direct evidence search...")
     evidence_result = extract_text_evidence(question, article)
 
-    if evidence_result["found"] and evidence_result["confidence"] > CONFIDENCE_THRESHOLD:
+    confidence = evidence_result["confidence"]
+    confidence_level = get_confidence_level(confidence)
+
+    if evidence_result["found"] and confidence_level == ConfidenceLevel.HIGH:
         return {
             "answer": True,
             "reason": evidence_result["evidence"][0][:300] if evidence_result["evidence"] else "Evidence found",
-            "confidence": evidence_result["confidence"]
+            "confidence": confidence,
+            "confidence_level": confidence_level.value,
+            "is_missing": False
         }
     else:
+        is_missing = confidence_level == ConfidenceLevel.LOW
         return {
             "answer": False,
-            "reason": f"Insufficient evidence (confidence: {evidence_result['confidence']:.2f})",
-            "confidence": evidence_result["confidence"]
+            "reason": f"Insufficient evidence (confidence: {confidence:.2f})",
+            "confidence": confidence,
+            "confidence_level": confidence_level.value,
+            "is_missing": is_missing
         }
 
 
@@ -250,6 +305,11 @@ def fallback_evidence_search(question: str, article: str) -> dict:
 def question_node(state: ComplianceState, llm) -> ComplianceState:
     """
     Process the current question using ReAct pattern with create_react_agent.
+
+    Enhanced with confidence-based routing:
+    - HIGH confidence (>75%): Answer YES/NO, continue normally
+    - MEDIUM confidence (50-75%): Answer YES/NO, flag as uncertain
+    - LOW confidence (<50%): Mark as MISSING, trigger early termination
 
     The ReAct agent:
     1. Thinks about what information is needed
@@ -276,27 +336,62 @@ def question_node(state: ComplianceState, llm) -> ComplianceState:
     answer = result["answer"]
     reason = result["reason"]
     confidence = result["confidence"]
+    confidence_level = result.get("confidence_level", ConfidenceLevel.MEDIUM.value)
+    is_missing = result.get("is_missing", False)
 
-    # Record answer
+    # Record answer with confidence tracking
     state["answers"][current_node] = AnswerRecord(
         question=question_text,
         answer=answer,
         evidence=reason,
-        confidence=confidence
+        confidence=confidence,
+        confidence_level=confidence_level,
+        is_missing=is_missing
     )
 
     answer_str = "YES" if answer else "NO"
-    print(f"[{current_node}] Answer: {answer_str} (confidence: {confidence:.2f})")
+    print(f"[{current_node}] Answer: {answer_str} (confidence: {confidence:.2f}, level: {confidence_level})")
 
-    # Determine next node (SKIP LOGIC via decision tree)
-    next_node = question_data.get("next_if_yes") if answer else question_data.get("next_if_no")
+    # Handle confidence-based routing
+    if is_missing:
+        # LOW confidence: Mark as missing and trigger early termination
+        missing_record = MissingFieldRecord(
+            question_id=current_node,
+            question_text=question_text,
+            confidence=confidence,
+            suggested_documents=get_suggested_documents(question_text)
+        )
+        state["missing_fields"].append(missing_record)
+        state["early_termination"] = True
+        state["current_node"] = ""  # Stop processing
 
-    if next_node is None:
-        state["current_node"] = ""
-        print(f"[{current_node}] Terminal node reached")
+        print(f"[{current_node}] LOW CONFIDENCE - Marked as MISSING")
+        print(f"[{current_node}] Suggested documents: {missing_record['suggested_documents']}")
+        print(f"[{current_node}] Early termination triggered")
+
+    elif confidence_level == ConfidenceLevel.MEDIUM.value:
+        # MEDIUM confidence: Flag as uncertain but continue
+        state["uncertain_answers"].append(current_node)
+        print(f"[{current_node}] MEDIUM CONFIDENCE - Flagged as uncertain")
+
+        # Determine next node normally
+        next_node = question_data.get("next_if_yes") if answer else question_data.get("next_if_no")
+        if next_node is None:
+            state["current_node"] = ""
+            print(f"[{current_node}] Terminal node reached")
+        else:
+            state["current_node"] = next_node
+            print(f"[{current_node}] Next: {next_node}")
+
     else:
-        state["current_node"] = next_node
-        print(f"[{current_node}] Next: {next_node}")
+        # HIGH confidence: Continue normally
+        next_node = question_data.get("next_if_yes") if answer else question_data.get("next_if_no")
+        if next_node is None:
+            state["current_node"] = ""
+            print(f"[{current_node}] Terminal node reached")
+        else:
+            state["current_node"] = next_node
+            print(f"[{current_node}] Next: {next_node}")
 
     return state
 
@@ -307,18 +402,51 @@ def question_node(state: ComplianceState, llm) -> ComplianceState:
 
 def verdict_node(state: ComplianceState) -> ComplianceState:
     """
-    Final scoring node that determines HIT or NO_HIT verdict.
+    Final scoring node that determines verdict.
 
-    Analyzes all answers and applies risk scoring to reach
-    autonomous determination.
+    Verdict types:
+    - HIT: Risk detected with high confidence → escalate/reject client
+    - NO_HIT: Clean, no risks found → approve client
+    - MISSING_INFO: Article lacks critical information → request more documents
+
+    Handles uncertainty through:
+    - Early termination tracking (low confidence answers)
+    - Missing fields tracking with suggested documents
+    - Uncertain answer flagging
     """
     answers = state["answers"]
+    missing_fields = state.get("missing_fields", [])
+    uncertain_answers = state.get("uncertain_answers", [])
+    early_termination = state.get("early_termination", False)
 
     print("\n" + "=" * 50)
     print("VERDICT DETERMINATION")
     print("=" * 50)
 
-    # Calculate risk indicators
+    # Check for MISSING_INFO verdict first
+    if early_termination or missing_fields:
+        state["final_verdict"] = Verdict.MISSING_INFO
+
+        # Build missing fields description
+        missing_descriptions = []
+        suggested_docs = set()
+        for mf in missing_fields:
+            missing_descriptions.append(f"{mf['question_id']}: {mf['question_text'][:50]}...")
+            suggested_docs.add(mf['suggested_documents'])
+
+        state["verdict_reason"] = f"Cannot determine compliance status. Missing: {'; '.join(missing_descriptions)}"
+        state["recommended_action"] = f"Please provide: {', '.join(suggested_docs)}"
+        state["risk_score"] = 0.0  # Cannot score without full information
+
+        print(f"[VERDICT] MISSING_INFO - Insufficient data for determination")
+        print(f"[VERDICT] Missing fields:")
+        for mf in missing_fields:
+            print(f"  - {mf['question_id']}: {mf['question_text'][:60]}... (conf: {mf['confidence']:.2f})")
+        print(f"[VERDICT] Suggested documents: {', '.join(suggested_docs)}")
+
+        return state
+
+    # Calculate risk indicators for HIT/NO_HIT determination
     hit_reasons = []
     risk_score = 0.0
 
@@ -347,13 +475,23 @@ def verdict_node(state: ComplianceState) -> ComplianceState:
     if hit_reasons:
         state["final_verdict"] = Verdict.HIT
         state["verdict_reason"] = "; ".join(hit_reasons)
+        state["recommended_action"] = "Escalate to compliance team for manual review"
         print(f"[VERDICT] HIT - Risk triggers found")
         for reason in hit_reasons:
             print(f"  - {reason}")
     else:
         state["final_verdict"] = Verdict.NO_HIT
         state["verdict_reason"] = "No compliance risks identified"
+        state["recommended_action"] = "Approve - proceed with onboarding"
         print(f"[VERDICT] NO_HIT - Clean")
+
+    # Flag if there were uncertain answers (MEDIUM confidence)
+    if uncertain_answers:
+        state["verdict_reason"] += f" [Note: {len(uncertain_answers)} answer(s) had medium confidence]"
+        state["recommended_action"] += f" [Review flagged questions: {', '.join(uncertain_answers)}]"
+        print(f"[VERDICT] Note: {len(uncertain_answers)} uncertain answer(s) flagged for review")
+        for ua in uncertain_answers:
+            print(f"  - {ua}")
 
     state["risk_score"] = risk_score
     print(f"[VERDICT] Risk Score: {risk_score:.2f}")
@@ -369,6 +507,8 @@ def should_continue_questions(state: ComplianceState) -> str:
     """
     Determines if we should continue asking questions or move to verdict.
 
+    Handles early termination when confidence is too low (MISSING_INFO case).
+
     Returns:
         "question" - Continue to next question
         "verdict" - Move to verdict determination
@@ -377,6 +517,11 @@ def should_continue_questions(state: ComplianceState) -> str:
     # Check if scenario was matched
     if state["scenario_id"] is None:
         return "end"
+
+    # Check for early termination due to low confidence (MISSING_INFO)
+    if state.get("early_termination", False):
+        print("[ROUTING] Early termination triggered - moving to verdict (MISSING_INFO)")
+        return "verdict"
 
     # Check if we've reached a terminal node (empty current_node)
     if not state["current_node"]:

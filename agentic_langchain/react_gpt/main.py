@@ -1,13 +1,3 @@
-"""
-Main Entry Point for SIAP Compliance Detection System (OpenAI Version).
-
-Demonstrates autonomous HIT/NO_HIT determination using LangGraph
-decision trees with conditional edges for skip logic.
-
-Uses OpenAI GPT models with native tool binding via create_react_agent.
-Uses documents from documents_test/ folder for testing.
-"""
-
 import os
 import sys
 import json
@@ -16,9 +6,16 @@ from glob import glob
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from langchain_openai import ChatOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from langchain_openai import AzureChatOpenAI
 from graph import process_article, process_batch
 from state import Verdict
+
+# Azure AD token provider for authentication
+token_provider = get_bearer_token_provider(
+    DefaultAzureCredential(),
+    "https://cognitiveservices.azure.com/.default"
+)
 
 
 # =============================================================================
@@ -57,12 +54,12 @@ def load_documents(documents_dir: str = None) -> list[dict]:
 
 # =============================================================================
 # DEMO FUNCTIONS
-# =============================================================================
+# ===========================================================================
 
 def demo_single_document():
     """Process a single document from documents_test."""
     print("\n" + "=" * 70)
-    print("PROCESSING DOCUMENT FROM documents_test/ (OpenAI GPT-4)")
+    print("PROCESSING DOCUMENT FROM documents_test/ (Azure OpenAI)")
     print("=" * 70)
 
     documents = load_documents()
@@ -77,14 +74,21 @@ def demo_single_document():
     print(f"Document ID: {doc['id']}")
     print(f"Length: {len(doc['text'])} characters")
 
-    # Initialize LLM - OpenAI with tool binding support
-    print("\nInitializing OpenAI (gpt-4)...")
-    print("Note: Ensure OPENAI_API_KEY environment variable is set")
+    # Initialize LLM - Azure OpenAI with tool binding support
+    print("\nInitializing Azure OpenAI with Azure AD authentication...")
 
-    llm = ChatOpenAI(
-        model="gpt-4",
+    llm = AzureChatOpenAI(
+        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+        azure_deployment=os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini"),
+        api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-01"),
+        azure_ad_token_provider=token_provider,
         temperature=0.3
     )
+
+    # Test LLM connection
+    print("Testing LLM connection...")
+    test_response = llm.invoke([{"role": "user", "content": "Say hello"}])
+    print(f"LLM test successful: {test_response.content[:50]}...")
 
     # Process
     result = process_article(doc["id"], doc["text"], llm)
@@ -129,7 +133,7 @@ def demo_single_document():
 def demo_all_documents():
     """Process all documents from documents_test."""
     print("\n" + "=" * 70)
-    print("BATCH PROCESSING ALL DOCUMENTS FROM documents_test/ (OpenAI GPT-4)")
+    print("BATCH PROCESSING ALL DOCUMENTS FROM documents_test/ (Azure OpenAI)")
     print("=" * 70)
 
     documents = load_documents()
@@ -143,11 +147,13 @@ def demo_all_documents():
         print(f"  - {doc['id']}")
 
     # Initialize LLM
-    print("\nInitializing OpenAI (gpt-4)...")
-    print("Note: Ensure OPENAI_API_KEY environment variable is set")
+    print("\nInitializing Azure OpenAI with Azure AD authentication...")
 
-    llm = ChatOpenAI(
-        model="gpt-4",
+    llm = AzureChatOpenAI(
+        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+        azure_deployment=os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini"),
+        api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-01"),
+        azure_ad_token_provider=token_provider,
         temperature=0.3
     )
 
@@ -181,10 +187,10 @@ def demo_all_documents():
 
 def main():
     """Main entry point."""
-    # Check for OpenAI API key
-    if not os.environ.get("OPENAI_API_KEY"):
-        print("ERROR: OPENAI_API_KEY environment variable not set")
-        print("Please set it with: export OPENAI_API_KEY='your-api-key'")
+    # Check for Azure OpenAI endpoint (using Azure AD authentication, no API key needed)
+    if not os.environ.get("AZURE_OPENAI_ENDPOINT"):
+        print("ERROR: AZURE_OPENAI_ENDPOINT environment variable not set")
+        print("Please set it with: export AZURE_OPENAI_ENDPOINT='https://your-resource.openai.azure.com/'")
         sys.exit(1)
 
     # Check for command line argument

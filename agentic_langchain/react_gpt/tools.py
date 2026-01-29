@@ -36,7 +36,6 @@ def extract_text_evidence(query: str, text: str, context_chars: int = 300) -> di
     query_terms = [w.lower() for w in re.findall(r'\w+', query.lower())
                    if w.lower() not in stop_words and len(w) > 2]
 
-    text_lower = text.lower()
     evidence_snippets = []
     matched_terms = set()
 
@@ -261,11 +260,9 @@ def search_evidence(query: str) -> str:
     return "NO EVIDENCE FOUND for this query."
 
 
-@tool
+@tool("check_threshold", parse_docstring=True)
 def check_threshold(value: float, threshold: float) -> str:
-    """
-    Check if a numerical value exceeds a compliance threshold.
-    Use for ownership percentages, income thresholds, etc.
+    """Check if a numerical value exceeds a compliance threshold. Use for ownership percentages, income thresholds, etc.
 
     Args:
         value: The percentage to check (e.g., 60.0 for 60%)

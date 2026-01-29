@@ -1,0 +1,13 @@
+# LangGraph - Graph-based workflow orchestration
+langgraph>=0.2.0
+
+# LangChain Core - Base components, tools, messages
+langchain-core>=0.3.0
+
+# LangChain OpenAI - ChatOpenAI with tool binding support
+langchain-openai>=0.2.0
+
+# OpenAI Python SDK (dependency of langchain-openai)
+openai>=1.0.0
+
+
