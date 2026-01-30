@@ -1,0 +1,24 @@
+{
+  "name": "Religious persons / organizations",
+  "description": "Assessment of involvement with religious persons or religious entities. Religious connections require Enhanced Due Diligence.",
+  "field": "religion",
+  "start": "Q1",
+  "questions": {
+    "Q1": {
+      "text": "Is the client involved as a religious person or with a religious entity?",
+      "summary": "Religious Person Verification - Is the client activity connected to a religious person or entity?",
+      "next_if_yes": null,
+      "next_if_no": null
+    }
+  },
+  "verdicts": {
+    "Q1_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Client is connected to a religious person or entity - requires Enhanced Due Diligence"
+    },
+    "Q1_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client is not connected to a religious person or entity"
+    }
+  }
+}

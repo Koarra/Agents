@@ -1,0 +1,122 @@
+{
+  "name": "Professional Sports Related Industries",
+  "description": "Assessment of involvement in professional sports including sports federations, competitions, clubs, agencies, broadcasting, and marketing. Special income threshold of 25 million CHF applies for sports organizations and clubs.",
+  "field": "sports, sport events, sport personalities, sports broadcasting, sports marketing, sports federations/organizations or sport agents/agencies",
+  "start": "Q1",
+  "questions": {
+    "Q1": {
+      "text": "Is the client involved in sports, sport events, sport personalities, sports broadcasting, sports marketing, sports federations/organizations, or sport agents/agencies?",
+      "summary": "Sports Involvement Verification - Is the client involved in sports-related activities?",
+      "next_if_yes": "Q2",
+      "next_if_no": null
+    },
+    "Q2": {
+      "text": "Does the client activity involve professional sports (i.e., sports in which athletes receive payment for their performance and can afford to make sport their primary career and source of income/wealth)?",
+      "summary": "Professional Sports Verification - Is the activity about professional sports?",
+      "next_if_yes": "Q3",
+      "next_if_no": null
+    },
+    "Q3": {
+      "text": "Is the client involved in international sports federations, companies owned or controlled by international sports federations, professional sport competitions and clubs, or sports agencies engaged in sports marketing, purchase or sale of rights (including broadcasting rights) related to professional sport personalities or events?",
+      "summary": "Activity Type Verification - What kind of sports-related activity?",
+      "next_if_yes": "Q4",
+      "next_if_no": null
+    },
+    "Q4": {
+      "text": "Is the client involved in professional sports organizations and clubs (as opposed to individual agents, marketing firms, or service providers)?",
+      "summary": "Organization or Club Verification - Is the activity a professional sports organization or club?",
+      "next_if_yes": "Q5",
+      "next_if_no": null
+    },
+    "Q5": {
+      "text": "Does the income from the sports-related activity exceed 25 million CHF (or equivalent)?",
+      "summary": "25 Million Income Check - High-value sports organization threshold",
+      "next_if_yes": null,
+      "next_if_no": null
+    },
+    "Q6": {
+      "text": "Does the client have direct engagement with professional sports (sports agent, federation official, club executive, or primary rights holder)?",
+      "summary": "Direct Engagement - Direct operational involvement in professional sports",
+      "next_if_yes": "Q7",
+      "next_if_no": "Q9"
+    },
+    "Q7": {
+      "text": "Does the client hold an executive management or board of directors position in the sports organization or agency?",
+      "summary": "Substantial Connection - Executive or board position",
+      "next_if_yes": null,
+      "next_if_no": "Q8"
+    },
+    "Q8": {
+      "text": "Does the income from the sports-related activity represent more than 10% of the client's total income?",
+      "summary": "Substantial Connection - Income threshold for direct engagement (>10%)",
+      "next_if_yes": null,
+      "next_if_no": null
+    },
+    "Q9": {
+      "text": "Does the client have indirect involvement with professional sports (equipment supplier, sponsor, broadcaster, investor, or service provider)?",
+      "summary": "Indirect Engagement - Supporting roles in sports industry",
+      "next_if_yes": "Q10",
+      "next_if_no": null
+    },
+    "Q10": {
+      "text": "Does the income from the sports-related activity represent more than 25% of the client's total income?",
+      "summary": "Substantial Connection - Income threshold for indirect engagement (>25%)",
+      "next_if_yes": null,
+      "next_if_no": null
+    }
+  },
+  "verdicts": {
+    "Q1_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client is not involved in sports-related activities"
+    },
+    "Q2_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Activity does not involve professional sports - amateur/recreational sports not considered SIAP"
+    },
+    "Q3_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client not involved in recognized professional sports activity types"
+    },
+    "Q4_NO": {
+      "verdict": "SIAP_EDD",
+      "reason": "Sports agent, marketing firm, or service provider in professional sports requires Enhanced Due Diligence"
+    },
+    "Q5_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Professional sports organization/club with income exceeding 25 million CHF requires Enhanced Due Diligence"
+    },
+    "Q5_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Professional sports organization/club with income below 25 million CHF threshold - not considered SIAP"
+    },
+    "Q7_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Direct professional sports engagement with executive/board position requires Enhanced Due Diligence"
+    },
+    "Q8_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Direct professional sports engagement with income >10% requires Enhanced Due Diligence"
+    },
+    "Q8_NO": {
+      "verdict": "SIAP_NO_EDD",
+      "reason": "Direct professional sports engagement but income <=10% - SIAP without Enhanced Due Diligence"
+    },
+    "Q9_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "No direct or indirect professional sports engagement identified"
+    },
+    "Q10_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Indirect professional sports engagement with income >25% requires Enhanced Due Diligence"
+    },
+    "Q10_NO": {
+      "verdict": "SIAP_NO_EDD",
+      "reason": "Indirect professional sports engagement but income <=25% - SIAP without Enhanced Due Diligence"
+    }
+  },
+  "notes": {
+    "special_threshold": "Sports organizations and clubs have a special 25 million CHF income threshold instead of standard percentage thresholds",
+    "non_org_path": "Non-organization sports activities (agents, marketing, broadcasters) follow the standard direct/indirect engagement path with percentage thresholds"
+  }
+}

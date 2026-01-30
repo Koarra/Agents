@@ -1,0 +1,114 @@
+{
+  "name": "Shipping",
+  "description": "Assessment of international maritime shipping involvement including tankers, bulk cargo carriers, and container ships. Excludes inland waterways, passenger transport, and dredging activities.",
+  "field": "tankers, bulk cargo carriers, container ships, international shipping, critical navigation routes for international shipping",
+  "start": "Q1",
+  "questions": {
+    "Q1": {
+      "text": "Is the client, through their activity, linked to the international maritime shipping industry?",
+      "summary": "Shipping Involvement Verification - Is the client linked to international maritime shipping industry?",
+      "next_if_yes": "Q2",
+      "next_if_no": null
+    },
+    "Q2": {
+      "text": "Is the client solely involved in operating predominantly on inland waterways, canals and/or rivers?",
+      "summary": "Non-SIAP Check - Inland waterways exclusion",
+      "next_if_yes": null,
+      "next_if_no": "Q3"
+    },
+    "Q3": {
+      "text": "Is the client solely involved in transporting passengers on ferries, cruise ships or ocean liners?",
+      "summary": "Non-SIAP Check - Passenger transport exclusion",
+      "next_if_yes": null,
+      "next_if_no": "Q4"
+    },
+    "Q4": {
+      "text": "Is the client solely involved in undertaking dredging and deep sea vessel activities?",
+      "summary": "Non-SIAP Check - Dredging activities exclusion",
+      "next_if_yes": null,
+      "next_if_no": "Q5"
+    },
+    "Q5": {
+      "text": "Is the client involved in transportation of wet and/or dry goods/products via tankers, bulk cargo carriers, or container ships?",
+      "summary": "Shipping Type Verification - Tankers, bulk cargo, or container ships involvement",
+      "next_if_yes": "Q6",
+      "next_if_no": null
+    },
+    "Q6": {
+      "text": "Does the client have direct engagement with the shipping operations (owning, operating, chartering, or managing vessels)?",
+      "summary": "Direct Engagement - Direct operational involvement in shipping",
+      "next_if_yes": "Q7",
+      "next_if_no": "Q9"
+    },
+    "Q7": {
+      "text": "Does the client hold an executive management or board of directors position in the shipping business?",
+      "summary": "Substantial Connection - Executive or board position",
+      "next_if_yes": null,
+      "next_if_no": "Q8"
+    },
+    "Q8": {
+      "text": "Does the income from the shipping-related activity represent more than 10% of the client's total income?",
+      "summary": "Substantial Connection - Income threshold for direct engagement (>10%)",
+      "next_if_yes": null,
+      "next_if_no": null
+    },
+    "Q9": {
+      "text": "Does the client have indirect involvement with shipping (providing specialist equipment, leasing port facilities, investing in shipping companies, or providing maritime services)?",
+      "summary": "Indirect Engagement - Supporting services or investments",
+      "next_if_yes": "Q10",
+      "next_if_no": null
+    },
+    "Q10": {
+      "text": "Does the income from the shipping-related activity represent more than 25% of the client's total income?",
+      "summary": "Substantial Connection - Income threshold for indirect engagement (>25%)",
+      "next_if_yes": null,
+      "next_if_no": null
+    }
+  },
+  "verdicts": {
+    "Q1_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client is not linked to international maritime shipping industry"
+    },
+    "Q2_YES": {
+      "verdict": "NOT_SIAP",
+      "reason": "Activity solely involves inland waterways, canals and/or rivers - not considered SIAP"
+    },
+    "Q3_YES": {
+      "verdict": "NOT_SIAP",
+      "reason": "Activity solely involves passenger transport (ferries, cruise ships, ocean liners) - not considered SIAP"
+    },
+    "Q4_YES": {
+      "verdict": "NOT_SIAP",
+      "reason": "Activity solely involves dredging and deep sea vessel activities - not considered SIAP"
+    },
+    "Q5_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client not involved in tankers, bulk cargo carriers, or container ships"
+    },
+    "Q7_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Direct shipping engagement with executive/board position requires Enhanced Due Diligence"
+    },
+    "Q8_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Direct shipping engagement with income >10% requires Enhanced Due Diligence"
+    },
+    "Q8_NO": {
+      "verdict": "SIAP_NO_EDD",
+      "reason": "Direct shipping engagement but income <=10% - SIAP without Enhanced Due Diligence"
+    },
+    "Q9_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "No direct or indirect shipping engagement identified"
+    },
+    "Q10_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Indirect shipping engagement with income >25% requires Enhanced Due Diligence"
+    },
+    "Q10_NO": {
+      "verdict": "SIAP_NO_EDD",
+      "reason": "Indirect shipping engagement but income <=25% - SIAP without Enhanced Due Diligence"
+    }
+  }
+}

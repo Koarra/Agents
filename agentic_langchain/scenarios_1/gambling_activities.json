@@ -1,0 +1,107 @@
+{
+  "name": "Casinos, betting or other gambling related activity",
+  "description": "Assessment of involvement in gambling activities including casinos, betting, online gambling, slot machines, gambling software, and related services. Excludes unregulated or illegal gambling operations.",
+  "field": "casino, betting, online gambling, slot machines, gambling software or gambling-related services",
+  "start": "Q1",
+  "questions": {
+    "Q1": {
+      "text": "Is the client involved in gambling through their activity?",
+      "summary": "Gambling Verification - Is the client involved in gambling?",
+      "next_if_yes": "Q2",
+      "next_if_no": null
+    },
+    "Q2": {
+      "text": "Is the client involved in unregulated or unlicensed online gambling activities?",
+      "summary": "Prohibited Cases - Unregulated/unlicensed online gambling check",
+      "next_if_yes": null,
+      "next_if_no": "Q3"
+    },
+    "Q3": {
+      "text": "Is the client involved in gambling activities that are illegal in the country of operations?",
+      "summary": "Prohibited Cases - Illegal gambling check",
+      "next_if_yes": null,
+      "next_if_no": "Q4"
+    },
+    "Q4": {
+      "text": "Is the client involved in casinos, betting, online casinos, online betting, providing slot machines, gambling software, IT services for gambling, or payment services for gambling-related activities?",
+      "summary": "Gambling Type Verification - Type of gambling activity",
+      "next_if_yes": "Q5",
+      "next_if_no": null
+    },
+    "Q5": {
+      "text": "Does the client have direct engagement with gambling operations (casino owner/operator, bookmaker, gambling platform operator, or primary gambling service provider)?",
+      "summary": "Direct Engagement - Direct operational involvement in gambling",
+      "next_if_yes": "Q6",
+      "next_if_no": "Q8"
+    },
+    "Q6": {
+      "text": "Does the client hold an executive management or board of directors position in the gambling business?",
+      "summary": "Substantial Connection - Executive or board position",
+      "next_if_yes": null,
+      "next_if_no": "Q7"
+    },
+    "Q7": {
+      "text": "Does the income from the gambling-related activity represent more than 10% of the client's total income?",
+      "summary": "Substantial Connection - Income threshold for direct engagement (>10%)",
+      "next_if_yes": null,
+      "next_if_no": null
+    },
+    "Q8": {
+      "text": "Does the client have indirect involvement with gambling (equipment supplier, software developer, payment processor, marketing services, or investor in gambling companies)?",
+      "summary": "Indirect Engagement - Supporting roles in gambling industry",
+      "next_if_yes": "Q9",
+      "next_if_no": null
+    },
+    "Q9": {
+      "text": "Does the income from the gambling-related activity represent more than 25% of the client's total income?",
+      "summary": "Substantial Connection - Income threshold for indirect engagement (>25%)",
+      "next_if_yes": null,
+      "next_if_no": null
+    }
+  },
+  "verdicts": {
+    "Q1_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client is not involved in gambling activities"
+    },
+    "Q2_YES": {
+      "verdict": "PROHIBITED",
+      "reason": "Unregulated or unlicensed online gambling - relationship prohibited"
+    },
+    "Q3_YES": {
+      "verdict": "PROHIBITED",
+      "reason": "Illegal gambling activities in country of operations - relationship prohibited"
+    },
+    "Q4_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client not involved in recognized gambling activity types"
+    },
+    "Q6_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Direct gambling engagement with executive/board position requires Enhanced Due Diligence"
+    },
+    "Q7_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Direct gambling engagement with income >10% requires Enhanced Due Diligence"
+    },
+    "Q7_NO": {
+      "verdict": "SIAP_NO_EDD",
+      "reason": "Direct gambling engagement but income <=10% - SIAP without Enhanced Due Diligence"
+    },
+    "Q8_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "No direct or indirect gambling engagement identified"
+    },
+    "Q9_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Indirect gambling engagement with income >25% requires Enhanced Due Diligence"
+    },
+    "Q9_NO": {
+      "verdict": "SIAP_NO_EDD",
+      "reason": "Indirect gambling engagement but income <=25% - SIAP without Enhanced Due Diligence"
+    }
+  },
+  "notes": {
+    "prohibited_verdict": "PROHIBITED is a special verdict indicating the relationship cannot proceed - stricter than SIAP_EDD"
+  }
+}

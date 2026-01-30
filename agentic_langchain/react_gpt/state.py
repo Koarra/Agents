@@ -14,6 +14,10 @@ class Verdict(Enum):
     NO_HIT = "NO_HIT"        # Clean, no risks found
     PENDING = "PENDING"      # Processing not complete yet
     MISSING_INFO = "MISSING_INFO"  # Insufficient information to determine
+    SIAP_EDD = "SIAP_EDD"    # SIAP with Enhanced Due Diligence required
+    SIAP_NO_EDD = "SIAP_NO_EDD"  # SIAP without Enhanced Due Diligence
+    NOT_SIAP = "NOT_SIAP"    # Not a SIAP case
+    PROHIBITED = "PROHIBITED"  # Relationship prohibited - cannot proceed
 
 
 class ConfidenceLevel(Enum):

@@ -1,0 +1,70 @@
+{
+  "name": "Sensitive Charities and Non-Profit Organizations (NPOs)",
+  "description": "Assessment of involvement in raising or disbursing funds for charitable purposes. Evaluates charitable purpose, funding sources, and connections to state entities or sanctioned regions.",
+  "field": "charities",
+  "start": "Q1",
+  "questions": {
+    "Q1": {
+      "text": "Is the client involved in raising or disbursing funds for charitable purposes?",
+      "summary": "Charities Involvement Verification - Does the client raise or disburse charitable funds?",
+      "next_if_yes": "Q2",
+      "next_if_no": null
+    },
+    "Q2": {
+      "text": "Is the client activity part of a well-known institutional charity (e.g., Cancer/Diabetes/MS foundations) listed on the Sensitive Charities Exclusion List, or an organization subordinated to the United Nations (UN)?",
+      "summary": "Accepted Charities Verification - Well-known charity or UN organization check",
+      "next_if_yes": null,
+      "next_if_no": "Q3"
+    },
+    "Q3": {
+      "text": "Does the charity operate in or have connections to sanctioned countries, regions, or entities?",
+      "summary": "SCAP Check - Sanctions connection assessment",
+      "next_if_yes": "Q4",
+      "next_if_no": "Q5"
+    },
+    "Q4": {
+      "text": "Does the charity have any connection to a State-Named Entity (SNE), government institution, or receive significant government funding?",
+      "summary": "SCAP Check - State connection and government funding assessment",
+      "next_if_yes": "Q5",
+      "next_if_no": "Q5"
+    },
+    "Q5": {
+      "text": "Is the client an organization that pursues a charitable purpose (including but not limited to relieving poverty, education, religion, protecting the environment, animal welfare, human rights, and community development)?",
+      "summary": "Charities Connection Verification - Charitable purpose check",
+      "next_if_yes": "Q6",
+      "next_if_no": null
+    },
+    "Q6": {
+      "text": "Are the funds for the client's activity raised from third parties such as the general public, private or commercial company donors, or sources including government organizations and agencies (such as international development cooperations, development banks, or multilateral organizations)?",
+      "summary": "Charities Connection Verification - Third-party funding source check",
+      "next_if_yes": null,
+      "next_if_no": null
+    }
+  },
+  "verdicts": {
+    "Q1_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client is not involved in raising or disbursing funds for charitable purposes"
+    },
+    "Q2_YES": {
+      "verdict": "NOT_SIAP",
+      "reason": "Well-known institutional charity on exclusion list or UN-subordinated organization - not considered SIAP"
+    },
+    "Q5_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Organization does not pursue a charitable purpose as defined"
+    },
+    "Q6_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Charity pursuing charitable purpose with third-party funding requires Enhanced Due Diligence"
+    },
+    "Q6_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Funds not raised from third parties - does not meet SIAP charity definition"
+    }
+  },
+  "notes": {
+    "and_logic": "Q5 and Q6 both must be YES for SIAP_EDD verdict - this implements the AND logic from the original tree",
+    "scap_integration": "Q3 and Q4 represent the SCAP (State Corruption Assessment) checks for sanctions and state connections"
+  }
+}

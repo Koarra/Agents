@@ -1,47 +1,94 @@
 {
   "name": "Cannabis Business",
-  "description": "Comprehensive assessment of cannabis-related business involvement including legal status, direct/indirect connections, and income thresholds",
+  "description": "Comprehensive assessment of cannabis-related business involvement including legal status, direct/indirect connections, and income thresholds. Excludes hemp-only businesses and permissible exchange activities.",
+  "field": "cannabis, marijuana, hemp, thc, cbd, dispensary, cultivation, growing",
   "start": "Q1",
   "questions": {
     "Q1": {
       "text": "Is the client involved in a cannabis-related business through their business activity?",
+      "summary": "Cannabis Involvement Verification - Is the client involved in cannabis business?",
       "next_if_yes": "Q2",
       "next_if_no": null
     },
     "Q2": {
       "text": "Is the cannabis-related activity illegal in the country of operation, or does it include trade or custody of digital assets via a non-permissible exchange?",
+      "summary": "Prohibited Cases - Illegal activity or non-permissible exchange check",
       "next_if_yes": null,
       "next_if_no": "Q3"
     },
     "Q3": {
       "text": "Does the client activity solely involve hemp business, trade/custody of cannabis securities on a permissible exchange, or face objections from compliance/reputational risk teams?",
+      "summary": "Non-SIAP Exclusions - Hemp only or permissible exchange check",
       "next_if_yes": null,
       "next_if_no": "Q4"
     },
     "Q4": {
       "text": "Does the client activity involve direct cannabis operations (growing, cultivating, testing, producing, distributing, or transporting cannabis)?",
+      "summary": "Direct Engagement - Direct cannabis operations check",
       "next_if_yes": "Q5",
       "next_if_no": "Q7"
     },
     "Q5": {
       "text": "Does the client hold an executive management or board of directors position in the cannabis business?",
+      "summary": "Substantial Connection - Executive or board position",
       "next_if_yes": null,
       "next_if_no": "Q6"
     },
     "Q6": {
       "text": "Does the income from the cannabis-related activity represent more than 10% of the client's total income?",
+      "summary": "Substantial Connection - Income threshold for direct engagement (>10%)",
       "next_if_yes": null,
       "next_if_no": null
     },
     "Q7": {
       "text": "Does the client activity involve indirect cannabis connections (providing specialist equipment for growing, leasing land/property for cannabis operations, or investing in cannabis businesses)?",
+      "summary": "Indirect Engagement - Supporting roles in cannabis industry",
       "next_if_yes": "Q8",
       "next_if_no": null
     },
     "Q8": {
       "text": "Does the income from the cannabis-related activity represent more than 25% of the client's total income?",
+      "summary": "Substantial Connection - Income threshold for indirect engagement (>25%)",
       "next_if_yes": null,
       "next_if_no": null
+    }
+  },
+  "verdicts": {
+    "Q1_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client is not involved in cannabis-related business"
+    },
+    "Q2_YES": {
+      "verdict": "PROHIBITED",
+      "reason": "Illegal cannabis activity or non-permissible exchange - relationship prohibited"
+    },
+    "Q3_YES": {
+      "verdict": "NOT_SIAP",
+      "reason": "Hemp-only business or permissible exchange activity - not considered SIAP"
+    },
+    "Q5_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Direct cannabis engagement with executive/board position requires Enhanced Due Diligence"
+    },
+    "Q6_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Direct cannabis engagement with income >10% requires Enhanced Due Diligence"
+    },
+    "Q6_NO": {
+      "verdict": "SIAP_NO_EDD",
+      "reason": "Direct cannabis engagement but income <=10% - SIAP without Enhanced Due Diligence"
+    },
+    "Q7_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "No direct or indirect cannabis engagement identified"
+    },
+    "Q8_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Indirect cannabis engagement with income >25% requires Enhanced Due Diligence"
+    },
+    "Q8_NO": {
+      "verdict": "SIAP_NO_EDD",
+      "reason": "Indirect cannabis engagement but income <=25% - SIAP without Enhanced Due Diligence"
     }
   }
 }

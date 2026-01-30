@@ -1,0 +1,66 @@
+{
+  "name": "Sensitive Intermediaries",
+  "description": "Assessment of intermediary involvement including brokers, consultants, sales representatives, lobbyists, public and government advisers, and licensing agents. Evaluates connections to state entities and corruption risk.",
+  "field": "intermediaries",
+  "start": "Q1",
+  "questions": {
+    "Q1": {
+      "text": "Is the client involved as an intermediary (broker, consultant, sales representative, lobbyist, public and government adviser, licensing agent, etc.)?",
+      "summary": "Intermediary Involvement Verification - Does the client activity consist of an intermediary role?",
+      "next_if_yes": "Q2",
+      "next_if_no": null
+    },
+    "Q2": {
+      "text": "Is the client activity carried out by a reputable professional service firm that is regulated in the area of anti-corruption and capable of evidencing this?",
+      "summary": "Accepted Intermediaries Verification - Regulated professional firm check",
+      "next_if_yes": null,
+      "next_if_no": "Q3"
+    },
+    "Q3": {
+      "text": "Does the client's intermediary activity involve any connection to a State-Named Entity (SNE), government institution, or public official?",
+      "summary": "SCAP Check - State connection assessment",
+      "next_if_yes": "Q4",
+      "next_if_no": "Q5"
+    },
+    "Q4": {
+      "text": "Is the client operating in a country or sector with high corruption risk according to recognized corruption indices (e.g., Transparency International CPI)?",
+      "summary": "SCAP Check - Corruption risk assessment",
+      "next_if_yes": "Q6",
+      "next_if_no": "Q5"
+    },
+    "Q5": {
+      "text": "Does the client activity constitute a service agreement, consultancy contract, or fee-based arrangement between a third party and a State-Named Entity (SNE) or governmental institution to obtain or retain business?",
+      "summary": "Intermediaries Connection Verification - SNE/government arrangement check",
+      "next_if_yes": null,
+      "next_if_no": null
+    },
+    "Q6": {
+      "text": "Does the intermediary have any direct or indirect relationship with Politically Exposed Persons (PEPs) or government decision-makers?",
+      "summary": "SCAP Check - PEP relationship assessment",
+      "next_if_yes": null,
+      "next_if_no": "Q5"
+    }
+  },
+  "verdicts": {
+    "Q1_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client is not involved as an intermediary"
+    },
+    "Q2_YES": {
+      "verdict": "NOT_SIAP",
+      "reason": "Reputable professional service firm that is regulated in anti-corruption - not considered SIAP"
+    },
+    "Q5_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Intermediary with service agreement/consultancy contract with SNE or government institution to obtain or retain business requires Enhanced Due Diligence"
+    },
+    "Q5_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "No service agreement or fee-based arrangement with SNE or government institution identified"
+    },
+    "Q6_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Intermediary with PEP/government decision-maker relationship in high corruption risk environment requires Enhanced Due Diligence"
+    }
+  }
+}

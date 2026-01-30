@@ -1,57 +1,102 @@
 {
   "name": "Commodity Trading",
-  "description": "Identifies commodity trading activities and assesses SIAP classification for energy, metals, agriculturals, and primary/secondary commodities",
+  "description": "Identifies commodity trading activities and assesses SIAP classification for energy, metals, agriculturals, and primary/secondary commodities. Excludes upstream operations, B2C retail sales, and financial instrument trading.",
+  "field": "commodity, trading, energy, metals, agricultural, oil, gas, petrochemicals, minerals, soft commodities",
   "start": "Q1",
   "questions": {
     "Q1": {
       "text": "Is the client directly involved in commodity trading through their business activity?",
+      "summary": "Commodity Trading Verification - Is the client involved in commodity trading?",
       "next_if_yes": "Q2",
       "next_if_no": null
     },
     "Q2": {
       "text": "Is the client activity solely involved in mining, extraction, and processing of commodities (upstream operations)?",
+      "summary": "Non-SIAP Exclusion - Upstream operations only check",
       "next_if_yes": null,
       "next_if_no": "Q3"
     },
     "Q3": {
       "text": "Is the client activity solely involved in the sale of commodities to retail consumers (B2C)?",
+      "summary": "Non-SIAP Exclusion - B2C retail sales check",
       "next_if_yes": null,
       "next_if_no": "Q4"
     },
     "Q4": {
       "text": "Is the client activity solely involved in trading of financial instruments relating to commodities (e.g., trading, portfolio management, custody, investment securities)?",
+      "summary": "Non-SIAP Exclusion - Financial instruments only check",
       "next_if_yes": null,
       "next_if_no": "Q5"
     },
     "Q5": {
       "text": "Is the client involved in trading of energy commodities (including petrochemicals, electricity)?",
+      "summary": "Commodity Type - Energy commodities check",
       "next_if_yes": "Q9",
       "next_if_no": "Q6"
     },
     "Q6": {
       "text": "Is the client involved in trading of metals (including minerals)?",
+      "summary": "Commodity Type - Metals and minerals check",
       "next_if_yes": "Q9",
       "next_if_no": "Q7"
     },
     "Q7": {
       "text": "Is the client involved in trading of agriculturals or soft commodities?",
+      "summary": "Commodity Type - Agricultural and soft commodities check",
       "next_if_yes": "Q9",
       "next_if_no": "Q8"
     },
     "Q8": {
       "text": "Is the client involved in trading of primary commodities that are extracted or captured directly from natural resources, or secondary commodities produced from processing primary resources (e.g., refined gold)?",
+      "summary": "Commodity Type - Primary/secondary commodities check",
       "next_if_yes": "Q9",
       "next_if_no": null
     },
     "Q9": {
       "text": "Does the client have direct engagement in the commodity trading activity (not just passive investment or advisory role)?",
+      "summary": "Direct Engagement - Active trading involvement check",
       "next_if_yes": "Q10",
       "next_if_no": null
     },
     "Q10": {
       "text": "Does the income from commodity trading activity represent more than 10% of the client's total income?",
+      "summary": "Substantial Connection - Income threshold (>10%)",
       "next_if_yes": null,
       "next_if_no": null
+    }
+  },
+  "verdicts": {
+    "Q1_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client is not involved in commodity trading"
+    },
+    "Q2_YES": {
+      "verdict": "NOT_SIAP",
+      "reason": "Activity solely involves upstream operations (mining/extraction/processing) - not considered SIAP"
+    },
+    "Q3_YES": {
+      "verdict": "NOT_SIAP",
+      "reason": "Activity solely involves B2C retail sales - not considered SIAP"
+    },
+    "Q4_YES": {
+      "verdict": "NOT_SIAP",
+      "reason": "Activity solely involves trading of financial instruments - not considered SIAP"
+    },
+    "Q8_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "Client not involved in recognized commodity trading types"
+    },
+    "Q9_NO": {
+      "verdict": "NOT_SIAP",
+      "reason": "No direct engagement in commodity trading (passive investment or advisory only)"
+    },
+    "Q10_YES": {
+      "verdict": "SIAP_EDD",
+      "reason": "Direct commodity trading engagement with income >10% requires Enhanced Due Diligence"
+    },
+    "Q10_NO": {
+      "verdict": "SIAP_NO_EDD",
+      "reason": "Direct commodity trading engagement but income <=10% - SIAP without Enhanced Due Diligence"
     }
   }
 }
